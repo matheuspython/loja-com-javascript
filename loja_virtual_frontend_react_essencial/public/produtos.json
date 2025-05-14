@@ -1,0 +1,23 @@
+[
+  {
+    "id": 1,
+    "nome": "Produto Exemplo 1",
+    "descricao": "Esta é uma descrição detalhada do Produto Exemplo 1.",
+    "preco": "R$ 99,90",
+    "imagemURL": "https://via.placeholder.com/300x200/6A0DAD/FFFFFF?text=Produto+1"
+  },
+  {
+    "id": 2,
+    "nome": "Produto Exemplo 2",
+    "descricao": "Descrição fascinante do Produto Exemplo 2, com características únicas.",
+    "preco": "R$ 149,50",
+    "imagemURL": "https://via.placeholder.com/300x200/000000/FFFFFF?text=Produto+2"
+  },
+  {
+    "id": 3,
+    "nome": "Produto Exemplo 3",
+    "descricao": "O Produto Exemplo 3 é a melhor escolha para você.",
+    "preco": "R$ 49,00",
+    "imagemURL": "https://via.placeholder.com/300x200/6A0DAD/FFFFFF?text=Produto+3"
+  }
+]

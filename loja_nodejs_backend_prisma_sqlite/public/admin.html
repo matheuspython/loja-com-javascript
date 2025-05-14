@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Minha Loja Virtual</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background-color: #000000;
+            color: #FFFFFF;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1, h2 {
+            color: #9F7AEA; /* Roxo */
+        }
+        label {
+            color: #D1D5DB; /* Cinza claro */
+        }
+        input[type="text"], input[type="number"], textarea, input[type="url"] {
+            background-color: #1F2937; /* Cinza escuro */
+            border: 1px solid #4B5563; /* Cinza médio */
+            color: #FFFFFF;
+            padding: 8px;
+            border-radius: 4px;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+        button {
+            background-color: #8B5CF6; /* Roxo */
+            color: #FFFFFF;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #7C3AED; /* Roxo mais escuro */
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #4B5563; /* Cinza médio */
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #1F2937; /* Cinza escuro */
+            color: #9F7AEA; /* Roxo */
+        }
+        .action-buttons a, .action-buttons button {
+            margin-right: 5px;
+            color: #8B5CF6; /* Roxo */
+            text-decoration: none;
+            background: none;
+            border: none;
+            padding: 0;
+            cursor: pointer;
+        }
+        .action-buttons a:hover, .action-buttons button:hover {
+            text-decoration: underline;
+            color: #7C3AED;
+        }
+        .mensagem {
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+            text-align: center;
+        }
+        .mensagem.sucesso {
+            background-color: #10B981; /* Verde */
+            color: #FFFFFF;
+        }
+        .mensagem.erro {
+            background-color: #EF4444; /* Vermelho */
+            color: #FFFFFF;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="text-center mb-8">
+            <h1 class="text-4xl font-bold">Painel Administrativo</h1>
+        </header>
+
+        <div id="mensagem-container"></div>
+
+        <section class="mb-8">
+            <h2 class="text-2xl font-semibold mb-4">Adicionar Novo Produto</h2>
+            <form id="formAdicionarProduto">
+                <div class="mb-4">
+                    <label for="nome" class="block mb-1">Nome do Produto:</label>
+                    <input type="text" id="nome" name="nome" required>
+                </div>
+                <div class="mb-4">
+                    <label for="descricao" class="block mb-1">Descrição:</label>
+                    <textarea id="descricao" name="descricao" rows="3" required></textarea>
+                </div>
+                <div class="mb-4">
+                    <label for="preco" class="block mb-1">Preço (R$):</label>
+                    <input type="number" id="preco" name="preco" step="0.01" required>
+                </div>
+                <div class="mb-4">
+                    <label for="imagem_url" class="block mb-1">URL da Imagem:</label>
+                    <input type="url" id="imagem_url" name="imagem_url">
+                </div>
+                <div class="mb-4">
+                    <label for="tamanho" class="block mb-1">Tamanho (opcional):</label>
+                    <input type="text" id="tamanho" name="tamanho">
+                </div>
+                <button type="submit">Adicionar Produto</button>
+            </form>
+        </section>
+
+        <section>
+            <h2 class="text-2xl font-semibold mb-4">Produtos Cadastrados</h2>
+            <table id="tabelaProdutos">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nome</th>
+                        <th>Preço</th>
+                        <th>Tamanho</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Produtos serão inseridos aqui pelo JavaScript -->
+                </tbody>
+            </table>
+            <p id="nenhumProduto" style="display: none;">Nenhum produto cadastrado ainda.</p>
+        </section>
+
+        <footer class="text-center mt-12 py-6 border-t border-purple-700">
+            <p class="text-purple-400">&copy; <span id="anoAtual"></span> Minha Loja Virtual - Admin</p>
+        </footer>
+    </div>
+
+    <script>
+        const apiUrl = "."; // API na mesma origem, ou especifique ex: http://localhost:3001
+        const mensagemContainer = document.getElementById("mensagem-container");
+
+        function exibirMensagem(texto, tipo = "sucesso") {
+            mensagemContainer.innerHTML = `<div class="mensagem ${tipo}">${texto}</div>`;
+            setTimeout(() => {
+                mensagemContainer.innerHTML = "";
+            }, 5000);
+        }
+
+        async function carregarProdutos() {
+            try {
+                const response = await fetch(`${apiUrl}/api/produtos`);
+                if (!response.ok) {
+                    throw new Error(`Erro HTTP: ${response.status}`);
+                }
+                const produtos = await response.json();
+                const tabelaCorpo = document.querySelector("#tabelaProdutos tbody");
+                const pNenhumProduto = document.getElementById("nenhumProduto");
+                tabelaCorpo.innerHTML = ""; // Limpa a tabela
+
+                if (produtos.length === 0) {
+                    pNenhumProduto.style.display = "block";
+                    document.querySelector("#tabelaProdutos thead").style.display = "none";
+                } else {
+                    pNenhumProduto.style.display = "none";
+                    document.querySelector("#tabelaProdutos thead").style.display = "";
+                    produtos.forEach(produto => {
+                        const tr = document.createElement("tr");
+                        tr.innerHTML = `
+                            <td>${produto.id}</td>
+                            <td>${produto.nome}</td>
+                            <td>R$ ${parseFloat(produto.preco).toFixed(2).replace(".", ",")}</td>
+                            <td>${produto.tamanho || "-"}</td>
+                            <td class="action-buttons">
+                                <a href="editar_produto.html?id=${produto.id}">Editar</a>
+                                <button onclick="deletarProduto(${produto.id})">Deletar</button>
+                            </td>
+                        `;
+                        tabelaCorpo.appendChild(tr);
+                    });
+                }
+            } catch (error) {
+                console.error("Erro ao carregar produtos:", error);
+                exibirMensagem("Erro ao carregar produtos. Verifique o console.", "erro");
+            }
+        }
+
+        document.getElementById("formAdicionarProduto").addEventListener("submit", async function(event) {
+            event.preventDefault();
+            const formData = new FormData(this);
+            const dadosProduto = {
+                nome: formData.get("nome"),
+                descricao: formData.get("descricao"),
+                preco: parseFloat(formData.get("preco")),
+                imagem_url: formData.get("imagem_url") || null,
+                tamanho: formData.get("tamanho") || null,
+            };
+
+            try {
+                const response = await fetch(`${apiUrl}/api/produtos`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(dadosProduto),
+                });
+                if (!response.ok) {
+                    const erroData = await response.json();
+                    throw new Error(erroData.error || `Erro HTTP: ${response.status}`);
+                }
+                exibirMensagem("Produto adicionado com sucesso!");
+                this.reset(); // Limpa o formulário
+                carregarProdutos(); // Recarrega a lista de produtos
+            } catch (error) {
+                console.error("Erro ao adicionar produto:", error);
+                exibirMensagem(`Erro ao adicionar produto: ${error.message}`, "erro");
+            }
+        });
+
+        async function deletarProduto(id) {
+            if (confirm("Tem certeza que deseja deletar este produto?")) {
+                try {
+                    const response = await fetch(`${apiUrl}/api/produtos/${id}`, {
+                        method: "DELETE",
+                    });
+                    if (!response.ok && response.status !== 204) { // 204 No Content é sucesso
+                         const erroData = await response.json().catch(() => ({ error: `Erro HTTP: ${response.status}` }));
+                        throw new Error(erroData.error || `Erro HTTP: ${response.status}`);
+                    }
+                    exibirMensagem("Produto deletado com sucesso!");
+                    carregarProdutos(); // Recarrega a lista de produtos
+                } catch (error) {
+                    console.error("Erro ao deletar produto:", error);
+                    exibirMensagem(`Erro ao deletar produto: ${error.message}`, "erro");
+                }
+            }
+        }
+
+        document.getElementById("anoAtual").textContent = new Date().getFullYear();
+        carregarProdutos(); // Carrega os produtos ao iniciar a página
+    </script>
+</body>
+</html>
+
